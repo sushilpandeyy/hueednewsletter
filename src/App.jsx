@@ -11,6 +11,7 @@ import "./Fonts.css";
 import ItemDetails from "./pages/ItemDetails";
 import Landing from "./pages/Landing";
 import Home from "./Layout/HomeLayout";
+import Newsletter from "./component/Landing/Newsletter";
 
 // shop imports
 import Shop from "./Layout/ShopLayout";
@@ -22,6 +23,8 @@ import Login from "./component/common/Login";
 import Signup from "./component/common/Signup";
 import Menu from "./component/common/Menu";
 import Cart from "./component/shop/Cart";
+
+
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -229,7 +232,7 @@ function App() {
     };
   }, []);
 
-  const router = createBrowserRouter([
+  /* const router = createBrowserRouter([
     {
       path: "/",
       element: <Home onOpenMenu={openMenu} />,
@@ -247,6 +250,14 @@ function App() {
         { path: "lookbook", element: <Lookbook /> },
       ],
     },
+  ]); */
+
+
+  const router = createBrowserRouter([
+    {
+      path:"/",
+      element:<Newsletter/>
+    }
   ]);
 
   return (
@@ -324,20 +335,20 @@ function App() {
 
       {/* Color Display */}
       <div
-        className="fixed bottom-8 left-1/2 -translate-x-1/2 z-30 uppercase tracking-[2px] pointer-events-none"
+        className="fixed bottom-8 tracking-[-0.3px] left-1/2 -translate-x-1/2 z-30 uppercase  pointer-events-none "
         style={{
-          fontFamily: "frankton-mono-regular",
-          mixBlendMode: "difference",
-          color: "white",
+          fontFamily: "frankton-mono-bold",
+          // mixBlendMode: "difference",
+          color: "#303030",
         }}
       >
         <span
-          className="text-[14px] font-semibold"
-          style={{ fontFamily: "sohen-breit" }}
+          className="text-[14px] tracking-[0px] "
+          style={{ fontFamily: "frankton-mono-bold",}}
         >
           HEX{" "}
         </span>
-        <span className="text-[16px] ml-[0.8vw]" style={{ fontFamily: "fk-regular" }}>
+        <span className="text-[16px] tracking-[1px] ml-[8px]" style={{ fontFamily: "eb-garamond-regular" }}>
           {currentColor}
         </span>
       </div>
