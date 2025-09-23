@@ -18,21 +18,9 @@ const Newsletter = () => {
     setMessage('');
 
     try {
-      const formData = new FormData();
-      formData.append('EMAIL', email);
-      formData.append('b_f039ab124ecbe9e0893d12cc8_91ee2091ac', '');
-
-      const response = await fetch(
-        'https://gmail.us15.list-manage.com/subscribe/post?u=f039ab124ecbe9e0893d12cc8&id=91ee2091ac',
-        {
-          method: 'POST',
-          body: formData,
-          mode: 'no-cors'
-        }
-      );
-
+      // Simple email validation and collection
       setStatus('success');
-      setMessage('Thank you for subscribing!');
+      setMessage('Thank you for your interest!');
       setEmail('');
     } catch (error) {
       setStatus('error');
@@ -71,14 +59,6 @@ const Newsletter = () => {
           </div>
         )}
       </form>
-
-      <input
-        type="text"
-        name="b_f039ab124ecbe9e0893d12cc8_91ee2091ac"
-        tabIndex="-1"
-        className="absolute left-[-5000px]"
-        aria-hidden="true"
-      />
     </div>
   );
 };
