@@ -13,12 +13,12 @@ const Newsletter = () => {
       try {
         const formData = new FormData();
         formData.append('EMAIL', email);
-        formData.append('u', '29cb99bf8b9ad8e5c4896dd6c');
-        formData.append('id', '819423f03c');
-        formData.append('f_id', '00c8dce0f0');
-        formData.append('b_29cb99bf8b9ad8e5c4896dd6c_819423f03c', '');
+  formData.append('u', 'f039ab124ecbe9e0893d12cc8');
+  formData.append('id', '91ee2091ac');
+  formData.append('f_id', '006999e1f0');
+  formData.append('b_f039ab124ecbe9e0893d12cc8_91ee2091ac', '');
 
-        await fetch('https://gmail.us3.list-manage.com/subscribe/post?u=29cb99bf8b9ad8e5c4896dd6c&id=819423f03c&f_id=00c8dce0f0', {
+        await fetch('https://gmail.us15.list-manage.com/subscribe/post?u=f039ab124ecbe9e0893d12cc8&id=91ee2091ac&f_id=006999e1f0', {
           method: 'POST',
           body: formData,
           mode: 'no-cors'
