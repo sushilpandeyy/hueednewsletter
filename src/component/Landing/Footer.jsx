@@ -1,6 +1,6 @@
 import React from "react";
 import { useLocation } from 'react-router-dom';
-import { FaArrowRight } from "react-icons/fa6"; 
+import Newsletter from "../common/Newsletter"; 
 
 const Footer = () => {
 
@@ -20,12 +20,9 @@ const Footer = () => {
               House <span style={{fontFamily:"editorial-italic"}} className="lowercase px-1">of</span>Hues
             </span>
           </div>
-          <div className="flex flex-col justify-start items-start uppercase font-[700] text-[16px] " style={{fontFamily:"sohen-breit"}}>
-            <h3>newsletters</h3>
-            <div className="border-b w-full flex items-center justify-center">
-            <input type="email" placeholder="Email " className=" uppercase mt-[15px]" style={{fontFamily:"frankton-mono-bold"}}/>
-            <FaArrowRight className="text-[10px]"/>
-            </div>
+          <div className="flex flex-col justify-start items-start">
+            <h3 className="uppercase font-[700] text-[16px] mb-4" style={{fontFamily:"sohen-breit"}}>newsletters</h3>
+            <Newsletter />
           </div>
         </div>
 
