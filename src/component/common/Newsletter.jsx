@@ -10,7 +10,7 @@ const Newsletter = () => {
         `}
       </style>
       <div id="mc_embed_signup">
-        <form action="https://gmail.us15.list-manage.com/subscribe/post?u=f039ab124ecbe9e0893d12cc8&amp;id=91ee2091ac&amp;f_id=006599e1f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" className="validate" target="_blank">
+        <form action="https://gmail.us15.list-manage.com/subscribe/post?u=f039ab124ecbe9e0893d12cc8&amp;id=91ee2091ac" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" className="validate">
           <div id="mc_embed_signup_scroll">
             <h2>Subscribe</h2>
             <div className="indicates-required"><span className="asterisk">*</span> indicates required</div>
