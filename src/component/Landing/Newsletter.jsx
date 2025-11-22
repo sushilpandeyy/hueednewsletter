@@ -213,7 +213,7 @@ const Newsletter = () => {
    <>
       <div className="w-screen h-screen bg-[#EFEFEF] relative overflow-hidden">
         <img
-          src="/static/medias/1.png"
+          src="/1.png"
           alt=""
           className="
     absolute 
