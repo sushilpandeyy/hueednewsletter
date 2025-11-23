@@ -14,10 +14,7 @@
 } */
 
 
-@font-face {
-    font-family: 'adieu';
-    src: url(./assets/fonts/Adieu-Regular.ttf);
-}
+
 
 
 /* grotesk fonts */
@@ -94,4 +91,14 @@
 @font-face {
     font-family: "frankton-mono-bold";
     src: url(./assets/fonts//Fraktion/Mono/PPFraktionMono-Bold.otf);
+}
+
+@font-face {
+    font-family: "frankton-mono-regular";
+    src: url(./assets/fonts//Fraktion/Mono/PPFraktionMono-Bold.otf);
+}
+
+@font-face {
+    font-family: "eb-garamond-italic";
+    src: url(./assets/fonts/eb_garamond/EBGaramond-Italic.ttf);
 }
