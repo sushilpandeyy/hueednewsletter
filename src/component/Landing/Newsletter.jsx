@@ -9,6 +9,7 @@ const Newsletter = () => {
   const [name, setName] = useState("");
   const [showEmail, setShowEmail] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const dropdownRef = useRef(null);
   const firebaseAppRef = useRef(null);
   const firebaseHelpersRef = useRef({
@@ -17,6 +18,7 @@ const Newsletter = () => {
     collection: null,
     serverTimestamp: null,
   });
+  const mailchimpIframeRef = useRef(null);
 
   const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -54,16 +56,26 @@ const Newsletter = () => {
     }
 
     try {
-      const [{ initializeApp }, firestoreModule] = await Promise.all([
+      const [{ initializeApp, getApps }, firestoreModule] = await Promise.all([
         import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"),
         import(
           "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"
         ),
       ]);
 
-      const app =
-        firebaseAppRef.current || initializeApp({ ...firebaseConfig });
-      firebaseAppRef.current = app;
+      // Check if Firebase app is already initialized
+      let app;
+      if (!firebaseAppRef.current) {
+        const apps = getApps();
+        if (apps.length > 0) {
+          app = apps[0];
+        } else {
+          app = initializeApp(firebaseConfig);
+        }
+        firebaseAppRef.current = app;
+      } else {
+        app = firebaseAppRef.current;
+      }
 
       const db = firestoreModule.getFirestore(app);
 
@@ -107,28 +119,77 @@ const Newsletter = () => {
   const handleNameSubmit = () => {
     const trimmedName = name.trim();
     if (!trimmedName) {
-      alert("Please enter your name");
+      setErrorMessage("Please enter your name");
+      setTimeout(() => setErrorMessage(""), 3000);
       return;
     }
 
+    setErrorMessage("");
     setShowEmail(true);
+  };
+
+  const submitToMailchimp = (userEmail) => {
+    return new Promise((resolve) => {
+      // Create a hidden iframe for Mailchimp submission
+      const iframe = document.createElement("iframe");
+      iframe.style.display = "none";
+      iframe.name = "mailchimp-form-iframe";
+      document.body.appendChild(iframe);
+
+      // Create a form
+      const form = document.createElement("form");
+      form.action =
+        "https://gmail.us15.list-manage.com/subscribe/post?u=f039ab124ecbe9e0893d12cc8&id=91ee2091ac&f_id=006999e1f0";
+      form.method = "POST";
+      form.target = "mailchimp-form-iframe";
+
+      // Add form fields
+      const emailField = document.createElement("input");
+      emailField.type = "email";
+      emailField.name = "EMAIL";
+      emailField.value = userEmail;
+      form.appendChild(emailField);
+
+      // Honeypot field
+      const honeypot = document.createElement("input");
+      honeypot.type = "text";
+      honeypot.name = "b_f039ab124ecbe9e0893d12cc8_91ee2091ac";
+      honeypot.value = "";
+      honeypot.tabIndex = -1;
+      form.appendChild(honeypot);
+
+      // Append form to body and submit
+      document.body.appendChild(form);
+      form.submit();
+
+      // Clean up after a short delay
+      setTimeout(() => {
+        document.body.removeChild(form);
+        document.body.removeChild(iframe);
+        resolve(true);
+      }, 1000);
+    });
   };
 
   const handleEmailSubmit = async () => {
     const trimmedEmail = email.trim();
+    const trimmedName = name.trim();
 
     if (!trimmedEmail) {
-      alert("Please enter your email address");
+      setErrorMessage("Please enter your email address");
+      setTimeout(() => setErrorMessage(""), 3000);
       return;
     }
 
     if (!emailRegex.test(trimmedEmail)) {
-      alert("Please enter a valid email address");
+      setErrorMessage("Please enter a valid email address");
+      setTimeout(() => setErrorMessage(""), 3000);
       return;
     }
 
-    if (!name.trim()) {
-      alert("Please enter your name first");
+    if (!trimmedName) {
+      setErrorMessage("Please enter your name first");
+      setTimeout(() => setErrorMessage(""), 3000);
       return;
     }
 
@@ -137,46 +198,49 @@ const Newsletter = () => {
     }
 
     setIsSubmitting(true);
+    setErrorMessage("");
 
-    let mailchimpSuccess = false;
     let firebaseSuccess = false;
+    let mailchimpSuccess = false;
 
+    // Step 1: Save to Firebase
     try {
-      const formData = new FormData();
-      formData.append("EMAIL", trimmedEmail);
-      formData.append("u", "f039ab124ecbe9e0893d12cc8");
-      formData.append("id", "91ee2091ac");
-      formData.append("f_id", "006999e1f0");
-      formData.append("b_f039ab124ecbe9e0893d12cc8_91ee2091ac", "");
-
-      await fetch(
-        "https://gmail.us15.list-manage.com/subscribe/post?u=f039ab124ecbe9e0893d12cc8&id=91ee2091ac&f_id=006999e1f0",
-        {
-          method: "POST",
-          body: formData,
-          mode: "no-cors",
-        }
-      );
-
-      mailchimpSuccess = true;
-    } catch (error) {
-      console.error("Newsletter subscription error (Mailchimp):", error);
-    }
-
-    try {
-      const result = await saveToFirebase(name, trimmedEmail);
+      const result = await saveToFirebase(trimmedName, trimmedEmail);
       firebaseSuccess = Boolean(result?.success);
+
+      if (!firebaseSuccess) {
+        console.error("[Newsletter] Firebase submission failed:", result?.error);
+        setErrorMessage("Subscription failed. Please try again later.");
+        setIsSubmitting(false);
+        setTimeout(() => setErrorMessage(""), 3000);
+        return;
+      }
     } catch (error) {
-      console.error("Newsletter subscription error (Firebase):", error);
+      console.error("[Newsletter] Firebase submission error:", error);
+      setErrorMessage("Subscription failed. Please try again later.");
+      setIsSubmitting(false);
+      setTimeout(() => setErrorMessage(""), 3000);
+      return;
     }
 
-    if (mailchimpSuccess || firebaseSuccess) {
+    // Step 2: Submit to Mailchimp (only if Firebase succeeded)
+    try {
+      await submitToMailchimp(trimmedEmail);
+      mailchimpSuccess = true;
+      console.log("[Newsletter] Mailchimp submission successful");
+    } catch (error) {
+      console.error("[Newsletter] Mailchimp submission error:", error);
+      // Don't fail the whole process if Mailchimp fails
+      // Firebase is the source of truth
+    }
+
+    // Step 3: Show success message
+    if (firebaseSuccess) {
       setIsOpen(true);
       setName("");
       setEmail("");
       setShowEmail(false);
-    } else {
-      alert("Subscription failed. Please try again later.");
+      setErrorMessage("");
     }
 
     setIsSubmitting(false);
@@ -275,11 +339,13 @@ const Newsletter = () => {
                   className="w-full text-[#303030] text-[16px] max-[500px]:text-[14px] outline-none placeholder-[#c7c7c7] bg-transparent"
                   placeholder="NAME"
                   style={{ fontFamily: "frankton-mono-bold" }}
+                  disabled={isSubmitting}
                 />
                 <button
                   onClick={handleNameSubmit}
-                  className="ml-4 hover:opacity-70 transition-opacity"
+                  className="ml-4 hover:opacity-70 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                   type="button"
+                  disabled={isSubmitting}
                 >
                   <IoIosArrowRoundForward className="text-[32px] cursor-pointer text-[#303030]" />
                 </button>
@@ -301,16 +367,34 @@ const Newsletter = () => {
                   className="w-full text-[#303030] text-[16px] max-[500px]:text-[14px] outline-none placeholder-[#c7c7c7] bg-transparent "
                   placeholder="EMAIL"
                   style={{ fontFamily: "frankton-mono-bold" }}
+                  disabled={isSubmitting}
                 />
                 <button
                   onClick={handleEmailSubmit}
-                  className="ml-4 hover:opacity-70 transition-opacity"
+                  className="ml-4 hover:opacity-70 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                   type="button"
+                  disabled={isSubmitting}
                 >
-                  <IoIosArrowRoundForward className="text-[32px] cursor-pointer text-[#303030]" />
+                  {isSubmitting ? (
+                    <div className="w-[32px] h-[32px] flex items-center justify-center">
+                      <div className="w-5 h-5 border-2 border-[#303030] border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  ) : (
+                    <IoIosArrowRoundForward className="text-[32px] cursor-pointer text-[#303030]" />
+                  )}
                 </button>
               </div>
             </div>
+
+            {/* Error Message */}
+            {errorMessage && (
+              <p
+                className="text-red-500 text-[14px] max-[500px]:text-[12px] mt-4 text-center"
+                style={{ fontFamily: "frankton-mono-bold" }}
+              >
+                {errorMessage}
+              </p>
+            )}
 
             <p
               className=" text-[#303030] w-[400px] max-[500px]:w-[260px] text-center  text-[22px]
